@@ -33,7 +33,7 @@ class S3Backend(KeyValueStoreBackend):
             if not isinstance(config, dict):
                 raise ImproperlyConfigured(
                     'S3 backend settings should be grouped in a dict')
-            self.aws_access_key_id = config.get('aws_region', self.aws_region )
+            self.aws_region = config.get('aws_region', self.aws_region )
             self.aws_access_key_id = config.get('aws_access_key_id',
                                             self.aws_access_key_id)
             self.aws_secret_access_key = config.get('aws_secret_access_key',
