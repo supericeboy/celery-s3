@@ -33,19 +33,19 @@ class S3Backend(KeyValueStoreBackend):
             if not isinstance(config, dict):
                 raise ImproperlyConfigured(
                     'S3 backend settings should be grouped in a dict')
-            self.aws_region = config.get('aws_region', self.aws_region )
+            self.aws_region = config.get('aws_region', self.aws_region)
             self.aws_access_key_id = config.get('aws_access_key_id',
-                                            self.aws_access_key_id)
+                                                self.aws_access_key_id)
             self.aws_secret_access_key = config.get('aws_secret_access_key',
-                                            self.aws_secret_access_key)
+                                                    self.aws_secret_access_key)
             self.bucket_name = config.get('bucket', self.bucket_name)
             self.base_path = config.get('base_path', self.base_path)
             self.use_ssl = (str.lower(config.get('use_ssl', str(self.use_ssl))) == 'true')
             self.use_rr = (str.lower(config.get('use_rr', str(self.use_rr))) == 'true')
-            
+
 
     def _get_key(self, key):
-        k = Key(self. s3_bucket)
+        k = Key(self.s3_bucket)
         if self.base_path:
             key = os.path.join(self.base_path, key)
         k.key = key
@@ -65,9 +65,9 @@ class S3Backend(KeyValueStoreBackend):
 
     @cached_property
     def s3_bucket(self):
-	conn = connect_to_region(self.aws_region,
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            is_secure=self.use_ssl,               # uncommmnt if you are not using ssl
-            calling_format = OrdinaryCallingFormat() )
+        conn = connect_to_region(self.aws_region,
+                                 aws_access_key_id=self.aws_access_key_id,
+                                 aws_secret_access_key=self.aws_secret_access_key,
+                                 is_secure=self.use_ssl,  # uncommmnt if you are not using ssl
+                                 calling_format=OrdinaryCallingFormat())
         return Bucket(connection=conn, name=self.bucket_name)
