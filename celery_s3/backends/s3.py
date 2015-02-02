@@ -47,7 +47,7 @@ class S3Backend(KeyValueStoreBackend):
     def _get_key(self, key):
         k = Key(self.s3_bucket)
         if self.base_path:
-            key = os.path.join(self.base_path, key)
+            key = '{0}/{1}'.format(self.base_path, key)
         k.key = key
         return k
 
