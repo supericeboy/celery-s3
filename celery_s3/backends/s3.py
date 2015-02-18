@@ -1,9 +1,7 @@
 import os
 
-from boto.s3 import connect_to_region
 from boto.s3.bucket import Bucket
 from boto.s3.connection import S3Connection
-from boto.s3.connection import OrdinaryCallingFormat
 from boto.s3.key import Key
 from kombu.utils import cached_property
 
@@ -18,13 +16,10 @@ class S3Backend(KeyValueStoreBackend):
     supports_native_join = False
     implements_incr = False
 
-    aws_region = 'us-east-1'
     aws_access_key_id = None
     aws_secret_access_key = None
     bucket_name = None
-    base_path = ''
-    use_ssl = True
-    use_rr = False
+    base_path = ""
 
     def __init__(self, **kwargs):
         super(S3Backend, self).__init__(**kwargs)
@@ -33,21 +28,17 @@ class S3Backend(KeyValueStoreBackend):
             if not isinstance(config, dict):
                 raise ImproperlyConfigured(
                     'S3 backend settings should be grouped in a dict')
-            self.aws_region = config.get('aws_region', self.aws_region)
             self.aws_access_key_id = config.get('aws_access_key_id',
-                                                self.aws_access_key_id)
+                                            self.aws_access_key_id)
             self.aws_secret_access_key = config.get('aws_secret_access_key',
-                                                    self.aws_secret_access_key)
+                                            self.aws_secret_access_key)
             self.bucket_name = config.get('bucket', self.bucket_name)
             self.base_path = config.get('base_path', self.base_path)
-            self.use_ssl = (str.lower(config.get('use_ssl', str(self.use_ssl))) == 'true')
-            self.use_rr = (str.lower(config.get('use_rr', str(self.use_rr))) == 'true')
-
 
     def _get_key(self, key):
-        k = Key(self.s3_bucket)
+        k = Key(self. s3_bucket)
         if self.base_path:
-            key = '{0}/{1}'.format(self.base_path, key)
+            key = self.base_path + "/" + str(key)
         k.key = key
         return k
 
@@ -58,16 +49,12 @@ class S3Backend(KeyValueStoreBackend):
         return None
 
     def set(self, key, value):
-        return self._get_key(key).set_contents_from_string(value, reduced_redundancy=self.use_rr)
+        return self._get_key(key).set_contents_from_string(value)
 
     def delete(self, key):
         self._get_key(key).delete()
 
     @cached_property
     def s3_bucket(self):
-        conn = connect_to_region(self.aws_region,
-                                 aws_access_key_id=self.aws_access_key_id,
-                                 aws_secret_access_key=self.aws_secret_access_key,
-                                 is_secure=self.use_ssl,  # uncommmnt if you are not using ssl
-                                 calling_format=OrdinaryCallingFormat())
+        conn = S3Connection(self.aws_access_key_id, self.aws_secret_access_key)
         return Bucket(connection=conn, name=self.bucket_name)
